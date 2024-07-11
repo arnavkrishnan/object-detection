@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Object Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        input[type="file"] {
+            margin: 20px;
+        }
+        img {
+            margin: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>YOLO Object Detection</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="file-input" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="result">
+        <h2>Processed Image</h2>
+        <img id="result-image" src="" alt="Processed Image">
+    </div>
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('file-input');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/dispatches', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/vnd.github.everest-preview+json',
+                    'Authorization': 'Bearer YOUR_GITHUB_TOKEN'
+                },
+                body: JSON.stringify({
+                    event_type: 'process-image',
+                    client_payload: { image: await fileToBase64(fileInput.files[0]) }
+                })
+            });
+
+            if (response.ok) {
+                document.getElementById('result-image').src = 'https://YOUR_USERNAME.github.io/YOUR_REPO/path/to/processed_image.jpg';
+            } else {
+                console.error('Error processing image:', response.statusText);
+            }
+        });
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+    </script>
+</body>
+</html>
